@@ -8,7 +8,7 @@ interface PostListProps {
 const PostList: React.FC<PostListProps> = ({ posts }) => {
     return (
         <div>
-            <h2>Post List</h2>
+            <h2 className='font-bold'>Post List</h2>
             <ul>
                 {posts.map(post => (
                     <li key={post.id}>
