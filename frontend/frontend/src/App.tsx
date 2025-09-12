@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import HomePage from './components/HomePage';
+import UserDetailsPage from './pages/UserDetailsPage';
 import './App.css';
 import UserPage from "./pages/UserPage";
 
@@ -14,6 +15,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/users" element={<UserPage />} />
+        <Route path="/users/:userId" element={<UserDetailsPage />} />
       </Routes>
       <Footer />
     </BrowserRouter>
