@@ -1,5 +1,7 @@
+
 import { useState, useEffect } from "react";
 import PostList from "./PostList";
+import PostModal from "./PostModal";
 import apiService from "../services/apiService";
 import type { Post, User } from "../types";
 
@@ -8,6 +10,9 @@ const HomePage = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
 
   const postsApi = apiService<Post>("posts");
   const usersApi = apiService<User>("users");
@@ -28,11 +33,9 @@ const HomePage = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
-  // Handlers for CRUD operations
   const handleDeletePost = async (id: number) => {
     try {
       await postsApi.delete(id);
@@ -42,25 +45,28 @@ const HomePage = () => {
     }
   };
 
-  const handleEditPost = async (post: Post) => {
-    try {
-      const updatedPost = await postsApi.update(post.id, post);
-      setPosts((prev) => prev.map((p) => (p.id === post.id ? updatedPost : p)));
-    } catch (err) {
-      console.error(err);
-    }
+  const handleOpenModalForCreate = () => {
+    setEditingPost(null);
+    setModalOpen(true);
   };
 
-  const handleCreatePost = async () => {
+  const handleOpenModalForEdit = (post: Post) => {
+    setEditingPost(post);
+    setModalOpen(true);
+  };
+
+  const handleSubmitPost = async (data: Omit<Post, "id">, id?: number) => {
     try {
-      const newPost: Post = {
-        id: Date.now(), // geçici id
-        userId: 1,     // demo user
-        title: "New Post",
-        body: "This is a newly created post.",
-      };
-      const createdPost = await postsApi.create(newPost);
-      setPosts((prev) => [createdPost, ...prev]); // en üste ekle
+      if (id) {
+        // edit yapılacak
+        const updatedPost = await postsApi.update(id, data);
+        setPosts((prev) => prev.map((p) => (p.id === id ? updatedPost : p)));
+      } else {
+        // create 
+        const newPost: Post = { ...data, id: Date.now() }; // geçici id veriyoruz
+        const createdPost = await postsApi.create(newPost);
+        setPosts((prev) => [createdPost, ...prev]);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -75,8 +81,8 @@ const HomePage = () => {
           <p className="text-gray-600">Browse the latest posts from all users</p>
         </div>
         <button
-          onClick={handleCreatePost}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          onClick={handleOpenModalForCreate}
+          className="px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-950 transition-colors"
         >
           + Add Post
         </button>
@@ -91,10 +97,20 @@ const HomePage = () => {
         <PostList 
           posts={posts}
           users={users}
-          onDelete={handleDeletePost} />
+          onDelete={handleDeletePost}
+          onEdit={handleOpenModalForEdit} // PostCard’a edit için prop geçilecek
+        />
       ) : (
         <p className="text-gray-600">No posts available.</p>
       )}
+
+      {/* Modal */}
+      <PostModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        initialData={editingPost || undefined}
+        onSubmit={handleSubmitPost}
+      />
     </div>
   );
 };

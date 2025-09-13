@@ -1,4 +1,4 @@
-import apiService from "../services/apiService"; // Post servisimiz
+import apiService from "../services/apiService";
 import { useState, useEffect, useRef } from "react";
 import { FiMoreVertical } from "react-icons/fi";
 import type { Post } from "../types";
@@ -7,9 +7,10 @@ interface PostCardProps {
   post: Post;
   username?: string;
   onDelete?: (id: number) => void; // parent component'e bildir
+  onEdit?: (post: Post) => void;
 }
 
-const PostCard = ({ post, username, onDelete }: PostCardProps) => {
+const PostCard = ({ post, username, onDelete, onEdit }: PostCardProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -63,7 +64,8 @@ const PostCard = ({ post, username, onDelete }: PostCardProps) => {
 
         {menuOpen && (
           <div className="absolute right-0 mt-2 w-32 bg-white border rounded-lg shadow-lg flex flex-col z-10">
-            <button className="px-3 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors">
+            <button onClick={() => onEdit?.(post)}
+             className="px-3 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors">
               Edit
             </button>
             <button

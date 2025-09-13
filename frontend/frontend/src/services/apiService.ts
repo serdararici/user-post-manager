@@ -21,10 +21,9 @@ const apiService = <T>(resource: string) => ({
 
   create: (data: T): Promise<T> =>
     request<T>(`/${resource}`, { method: "POST", body: JSON.stringify(data) }),
-
-  update: (id: number, data: T): Promise<T> =>
-    request<T>(`/${resource}/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   
+  update: (id: number, data: Omit<T, "id">): Promise<T> =>
+    request<T>(`/${resource}/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   delete: (id: number): Promise<void> =>
     request<void>(`/${resource}/${id}`, { method: "DELETE" }),
 });
