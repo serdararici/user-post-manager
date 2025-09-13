@@ -1,23 +1,28 @@
-
-import type { Post } from '../types';
+import PostCard from "./PostCard";
+import type { Post, User } from "../types";
 
 interface PostListProps {
-    posts: Post[];
+  posts: Post[];
+  users: User[];
+  onDelete: (id: number) => void;
 }
 
-const PostList: React.FC<PostListProps> = ({ posts }) => {
-    return (
-        <div>
-            <h2 className='font-bold'>Post List</h2>
-            <ul>
-                {posts.map(post => (
-                    <li key={post.id}>
-                        <h3>{post.title}</h3>
-                        <p>{post.body}</p>
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
-}
+const PostList = ({ posts, users, onDelete }: PostListProps) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {posts.map(post => {
+        const user = users.find(u => u.id === post.userId);
+        return (
+          <PostCard
+            key={post.id}
+            post={post}
+            username={user?.name}
+            onDelete={onDelete}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
 export default PostList;

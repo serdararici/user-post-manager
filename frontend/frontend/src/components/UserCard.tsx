@@ -29,19 +29,19 @@ const UserCard = ({ user, onEdit, onDelete }: UserCardProps) => {
         onClick={(e) => e.stopPropagation()} // butona tıklayınca navigate olmasın
       >
         <button
-          className="btn btn-sm btn-primary hover:underline transition cursor-pointer"
+          className="btn btn-sm hover:underline transition cursor-pointer"
           onClick={() => navigate(`/users/${user.id}`)}
         >
           View
         </button>
         <button
-          className="btn btn-sm btn-secondary hover:underline transition cursor-pointer"
+          className="btn btn-sm hover:underline transition cursor-pointer"
           onClick={() => onEdit?.(user.id)}
         >
           Edit
         </button>
         <button
-          className="btn btn-sm btn-error hover:underline transition cursor-pointer"
+          className="btn btn-sm hover:underline transition cursor-pointer"
           onClick={() => onDelete?.(user.id)}
         >
           Delete

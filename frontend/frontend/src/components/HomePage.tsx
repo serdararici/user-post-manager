@@ -1,31 +1,31 @@
-import type React from "react";
 import { useState, useEffect } from "react";
-import UserList from "./UserList";
 import PostList from "./PostList";
 import apiService from "../services/apiService";
-import type { User, Post } from "../types";
+import type { Post, User } from "../types";
 
+const HomePage = () => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const HomePage: React.FC = () => {
-const [users, setUsers] = useState<User[]>([]);
-const [posts, setPosts] = useState<Post[]>([]);
-
-  const usersApi = apiService<User>("users");
   const postsApi = apiService<Post>("posts");
-
+  const usersApi = apiService<User>("users");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [usersData, postsData] = await Promise.all([
-          usersApi.getAll(),
+        setLoading(true);
+        const [postsData, usersData] = await Promise.all([
           postsApi.getAll(),
+          usersApi.getAll(),
         ]);
-
-        setUsers(usersData);
         setPosts(postsData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+        setUsers(usersData);
+      } catch (err) {
+        setError("Failed to load data");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -33,44 +33,70 @@ const [posts, setPosts] = useState<Post[]>([]);
   }, []);
 
   // Handlers for CRUD operations
-    const handleDeleteUser = async (id: number) => {
-    await usersApi.delete(id);
-    setUsers(prev => prev.filter(u => u.id !== id));
-  };
-
-  const handleEditUser = async (user: User) => {
-    const updatedUser = await usersApi.update(user.id, user);
-    setUsers(prev => prev.map(u => (u.id === user.id ? updatedUser : u)));
-  };
-
-  const handleCreateUser = async (newUser: User) => {
-    const createdUser = await usersApi.create(newUser);
-    setUsers(prev => [...prev, createdUser]);
-  };
-
   const handleDeletePost = async (id: number) => {
-    await postsApi.delete(id);
-    setPosts(prev => prev.filter(p => p.id !== id));
+    try {
+      await postsApi.delete(id);
+      setPosts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleEditPost = async (post: Post) => {
-    const updatedPost = await postsApi.update(post.id, post);
-    setPosts(prev => prev.map(p => (p.id === post.id ? updatedPost : p)));
+    try {
+      const updatedPost = await postsApi.update(post.id, post);
+      setPosts((prev) => prev.map((p) => (p.id === post.id ? updatedPost : p)));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleCreatePost = async (newPost: Post) => {
-    const createdPost = await postsApi.create(newPost);
-    setPosts(prev => [...prev, createdPost]);
+  const handleCreatePost = async () => {
+    try {
+      const newPost: Post = {
+        id: Date.now(), // geçici id
+        userId: 1,     // demo user
+        title: "New Post",
+        body: "This is a newly created post.",
+      };
+      const createdPost = await postsApi.create(newPost);
+      setPosts((prev) => [createdPost, ...prev]); // en üste ekle
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-blue-600 underline">
-        Home Page
-      </h1>
-      <UserList users={users} />
-      <PostList posts={posts} />
+    <div className="max-w-7xl mx-auto p-6">
+      {/* Header */}
+      <div className="mb-8 flex flex-col md:flex-row items-center justify-between">
+        <div className="mb-4 md:mb-0">
+          <h1 className="text-3xl font-bold text-gray-900">All Posts</h1>
+          <p className="text-gray-600">Browse the latest posts from all users</p>
+        </div>
+        <button
+          onClick={handleCreatePost}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          + Add Post
+        </button>
+      </div>
+
+      {/* Content */}
+      {loading ? (
+        <p className="text-gray-500">Loading posts...</p>
+      ) : error ? (
+        <p className="text-red-500">{error}</p>
+      ) : posts.length > 0 ? (
+        <PostList 
+          posts={posts}
+          users={users}
+          onDelete={handleDeletePost} />
+      ) : (
+        <p className="text-gray-600">No posts available.</p>
+      )}
     </div>
   );
 };
+
 export default HomePage;
