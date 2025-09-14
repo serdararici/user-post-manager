@@ -21,6 +21,12 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit, initia
     setBody("");
   };
 
+  const handleClose = () => {
+    onClose();
+    setTitle("");
+    setBody("");
+  };
+
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title);
@@ -51,7 +57,7 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit, initia
           />
         </div>
         <div className="modal-action">
-          <button className="btn" onClick={onClose}>Cancel</button>
+          <button className="btn" onClick={handleClose}>Cancel</button>
           <button className="btn btn-primary" onClick={handleSubmit}>
             {initialData ? "Save Changes" : "Create"}
           </button>
