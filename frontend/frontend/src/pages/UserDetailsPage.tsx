@@ -44,6 +44,7 @@ if (loading) {
   return (
     <div className="flex flex-col justify-center items-center min-h-[60vh] text-center">
       <p className="text-lg font-semibold text-gray-700">Loading...</p>
+      <span className="loading loading-dots loading-xl"></span>
     </div>
   );
 }

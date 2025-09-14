@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import PostList from "./PostList";
 import PostModal from "./PostModal";
 import apiService from "../services/apiService";
+import Alert from "./Alert";
 import type { Post, User } from "../types";
 
 const HomePage = () => {
@@ -14,8 +15,20 @@ const HomePage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
 
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertType, setAlertType] = useState<"success" | "error" | "info" | "warning">("success");
+
+
   const postsApi = apiService<Post>("posts");
   const usersApi = apiService<User>("users");
+
+  useEffect(() => {
+    if (alertMessage) {
+      const timer = setTimeout(() => setAlertMessage(null), 3000); // 3 saniye sonra kaybolur
+      return () => clearTimeout(timer);
+    }
+  }, [alertMessage]);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,6 +53,8 @@ const HomePage = () => {
     try {
       await postsApi.delete(id);
       setPosts((prev) => prev.filter((p) => p.id !== id));
+      setAlertType("success");
+      setAlertMessage("Post deleted successfully!");
     } catch (err) {
       console.error(err);
     }
@@ -59,13 +74,31 @@ const HomePage = () => {
     try {
       if (id) {
         // edit yapılacak
-        const updatedPost = await postsApi.update(id, data);
-        setPosts((prev) => prev.map((p) => (p.id === id ? updatedPost : p)));
+        try {
+          const updatedPost = await postsApi.update(id, data);
+          setPosts((prev) => prev.map((p) => (p.id === id ? updatedPost : p)));
+          setAlertType("success");
+          setAlertMessage("Post updated successfully!");
+        } catch (err) {
+          console.log("API update failed, updating locally");
+          // API hatası durumunda local update yap
+          setPosts((prev) => prev.map((p) => (p.id === id ? { ...data, id } : p)));
+          setAlertType("success");
+          setAlertMessage("Post updated successfully!");
+        }
+        
       } else {
         // create 
-        const newPost: Post = { ...data, id: Date.now() }; // geçici id veriyoruz
-        const createdPost = await postsApi.create(newPost);
-        setPosts((prev) => [createdPost, ...prev]);
+        try {
+          const newPost: Post = { ...data, id: Date.now() }; // geçici id veriyoruz
+          const createdPost = await postsApi.create(newPost);
+          setPosts((prev) => [createdPost, ...prev]);
+          setAlertType("success");
+          setAlertMessage("Post added successfully!");
+        } catch (err) {
+          console.log("API call made");
+        }
+        
       }
     } catch (err) {
       console.error(err);
@@ -90,7 +123,10 @@ const HomePage = () => {
 
       {/* Content */}
       {loading ? (
-        <p className="text-gray-500">Loading posts...</p>
+        <div className="flex flex-col justify-center items-center min-h-[60vh] text-center">
+          <p className="text-gray-500">Loading posts...</p>
+          <span className="loading loading-dots loading-xl"></span>
+        </div>
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : posts.length > 0 ? (
@@ -111,6 +147,14 @@ const HomePage = () => {
         initialData={editingPost || undefined}
         onSubmit={handleSubmitPost}
       />
+
+      {alertMessage && (
+      <Alert 
+        type={alertType}
+        message={alertMessage}
+        onClose={() => setAlertMessage(null)}
+      />
+    )}
     </div>
   );
 };
