@@ -3,7 +3,7 @@ import type { User } from "../types";
 
 interface UserCardProps {
   user: User;
-  onEdit?: (id: number) => void;
+  onEdit?: (user: User) => void;
   onDelete?: (id: number) => void;
 }
 
@@ -36,7 +36,7 @@ const UserCard = ({ user, onEdit, onDelete }: UserCardProps) => {
         </button>
         <button
           className="btn btn-sm hover:underline transition cursor-pointer"
-          onClick={() => onEdit?.(user.id)}
+          onClick={() => onEdit?.(user)}
         >
           Edit
         </button>

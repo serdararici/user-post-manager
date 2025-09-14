@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { Post } from "../types";
 
 interface PostModalProps {
@@ -20,6 +20,14 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit, initia
     setTitle("");
     setBody("");
   };
+
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title);
+      setBody(initialData.body);
+    }
+  }, [initialData]);
+
 
   if (!isOpen) return null;
 

@@ -78,9 +78,9 @@ const PostCard = ({ post, username, onDelete, onEdit }: PostCardProps) => {
         )}
       </div>
 
-      <h2 className="text-xl font-semibold text-gray-800 mb-1">{post.title}</h2>
-      <p className="text-gray-500 text-sm mb-3">by {username ?? "Unknown"}</p>
-      <p className="text-gray-600 mb-10">{post.body}</p>
+      <h2 className="text-xl font-semibold text-gray-800 mb-1 line-clamp-3">{post.title}</h2>
+      <p className="text-gray-500 text-sm mb-3 line-clamp-1">by {username ?? "Unknown"}</p>
+      <p className="text-gray-600 mb-10 line-clamp-5">{post.body}</p>
 
       <div className="absolute bottom-4 right-4">
         <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium">
